@@ -206,6 +206,73 @@ model Game {
    railway up
    ```
 
+## 🚂 Railway Deployment (Recommended)
+
+Railway is the **recommended deployment platform** for GoodGame? due to its excellent support for full-stack Next.js applications with databases.
+
+### Why Railway?
+
+- ✅ **Full-stack support**: Frontend, API routes, database, cron jobs
+- ✅ **Managed PostgreSQL**: Zero-config database setup
+- ✅ **Next.js optimized**: Automatic builds and deployments
+- ✅ **Environment management**: Secure variable handling
+- ✅ **Cron job support**: Native background task scheduling
+
+### Railway Setup Steps:
+
+1. **Create Railway Account:**
+   - Sign up at [railway.app](https://railway.app)
+   - Connect your GitHub account
+
+2. **Deploy from GitHub:**
+   - Connect repository: `https://github.com/bohselecta/good-game.git`
+   - Railway auto-detects Next.js and Prisma
+
+3. **Database Setup:**
+   - Railway automatically provisions PostgreSQL
+   - Database URL is automatically set as `DATABASE_URL`
+
+4. **Environment Variables:**
+   In Railway dashboard → Variables:
+   ```env
+   DEEPSEEK_API_KEY=your-deepseek-api-key-here
+   ADMIN_PASSWORD=your-admin-password-here
+   CRON_SECRET=your-cron-secret-here
+   NODE_ENV=production
+   ```
+
+5. **Database Migration:**
+   Railway automatically runs:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+6. **Cron Jobs:**
+   Railway supports cron jobs. Add this to your Railway project:
+   ```bash
+   # Install Railway CLI
+   npm install -g @railway/cli
+   railway login
+
+   # Create cron job to hit /api/cron every hour
+   railway run --service your-service-name "curl -X GET https://your-app.railway.app/api/cron -H 'Authorization: Bearer YOUR_CRON_SECRET'"
+   ```
+
+### Railway vs Other Platforms:
+
+| Feature | Railway | Vercel | Render |
+|---------|---------|--------|--------|
+| Next.js Support | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Database | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Cron Jobs | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ |
+| Free Tier | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Setup Complexity | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+
+**Railway URLs:**
+- **Dashboard**: https://railway.app/dashboard
+- **Docs**: https://docs.railway.app/
+
 ## 🧪 Testing
 
 ### Manual Testing
