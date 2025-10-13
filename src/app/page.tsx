@@ -1,102 +1,147 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState, useEffect } from 'react';
+import { GameCard } from '../components/GameCard';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+interface Game {
+  id: string;
+  sport: string;
+  league: string;
+  homeTeam: string;
+  awayTeam: string;
+  gameDate: Date;
+  status: string;
+  qualityScore?: number;
+  isClose?: boolean;
+  excitement?: string;
+  analysis?: string;
+  finalScore?: string;
+  winner?: string;
+  leadChanges?: number;
+}
+
+interface ApiGameResponse {
+  id: string;
+  sport: string;
+  league: string;
+  homeTeam: string;
+  awayTeam: string;
+  gameDate: string;
+  status: string;
+  qualityScore?: number;
+  isClose?: boolean;
+  excitement?: string;
+  analysis?: string;
+  finalScore?: string;
+  winner?: string;
+  leadChanges?: number;
+}
+
+export default function HomePage() {
+  const [games, setGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchGames() {
+      try {
+        const res = await fetch('/api/games?limit=50', {
+          cache: 'no-store'
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch games');
+        }
+
+        const data = await res.json();
+        const formattedGames = (data.games || []).map((game: ApiGameResponse) => ({
+          ...game,
+          gameDate: new Date(game.gameDate)
+        }));
+        setGames(formattedGames);
+      } catch (error) {
+        console.error('Error fetching games:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchGames();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading games...</p>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              GoodGame?
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Discover if recorded games are worth watching without spoiling the outcome.
+              Get AI-powered analysis of competitiveness, excitement, and entertainment value.
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        {games.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🎮</div>
+            <h2 className="text-2xl font-semibold text-gray-700 mb-2">No games analyzed yet</h2>
+            <p className="text-gray-500 mb-6">
+              We&apos;re working on analyzing recent games. Check back soon!
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> Games are analyzed automatically every hour.
+                You can also manually trigger analysis from the admin panel.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Recent Games ({games.length})
+              </h2>
+              <p className="text-gray-600">
+                Click on any game to reveal spoilers progressively
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {games.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
+            </div>
+          </>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="bg-white border-t mt-16">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="text-center text-gray-500 text-sm">
+            <p>Built with Next.js, DeepSeek AI, and sports data APIs</p>
+            <p className="mt-2">
+              Supporting NFL, NBA, Premier League, and more sports
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );

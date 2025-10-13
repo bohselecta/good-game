@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  goodgame:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./dev.db
+      # Add your environment variables here
+      # - DEEPSEEK_API_KEY=your-key
+      # - ADMIN_PASSWORD=your-password
+      # - CRON_SECRET=your-secret
+    volumes:
+      - ./dev.db:/app/dev.db
+    restart: unless-stopped
+
+  # Optional: Add PostgreSQL if you want to use a database container
+  # postgres:
+  #   image: postgres:15
+  #   environment:
+  #     - POSTGRES_DB=goodgame
+  #     - POSTGRES_USER=goodgame
+  #     - POSTGRES_PASSWORD=password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+# volumes:
+#   postgres_data:

@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id            String   @id @default(cuid())
+  sport         String   // "nfl", "nba", "soccer", "f1"
+  league        String   // "NFL", "Premier League", etc.
+  homeTeam      String
+  awayTeam      String
+  gameDate      DateTime
+  status        String   // "scheduled", "live", "final"
+
+  // Analysis results
+  qualityScore  Int?     // 1-10, how "good" the game is
+  isClose       Boolean?
+  excitement    String?  // "blowout", "competitive", "thriller"
+  analysis      String?  // DeepSeek's detailed analysis
+
+  // Spoilers (nullable until revealed)
+  finalScore    String?  // "28-24"
+  winner        String?
+  leadChanges   Int?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([gameDate, sport])
+}
