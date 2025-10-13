@@ -317,6 +317,38 @@ curl -X POST http://localhost:3000/api/analyze \
   -d '{"password":"your-password"}'
 ```
 
+## 🗄️ Database Setup (Supabase - Free Tier)
+
+Since Vercel doesn't support SQLite in serverless functions, we'll use **Supabase** (free PostgreSQL database):
+
+### 1. **Create Supabase Account**
+- Go to [supabase.com](https://supabase.com)
+- Sign up for free account
+- Create a new project
+
+### 2. **Get Database URL**
+- Go to **Settings** → **Database**
+- Copy the **Connection string** (it looks like: `postgresql://postgres:[password]@db.xxx.supabase.co:5432/postgres`)
+- Replace `[password]` with your actual database password
+
+### 3. **Update Environment Variables**
+Add to your Vercel environment variables:
+```
+DATABASE_URL=postgresql://postgres:your_password_here@db.xxx.supabase.co:5432/postgres
+```
+
+### 4. **Run Database Migration**
+```bash
+npx prisma db push
+```
+
+### 5. **Test Connection**
+Visit your Vercel app - the database should now work!
+
+**Free Tier Limits:** 500MB database, plenty for a game analysis app!
+
+---
+
 ## 🔍 Troubleshooting
 
 ### Common Issues
