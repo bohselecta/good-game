@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { SpoilerReveal } from '../../components/SpoilerReveal';
+import { SpoilerReveal } from '../../../components/SpoilerReveal';
 
 interface Game {
   id: string;
