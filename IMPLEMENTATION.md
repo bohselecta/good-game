@@ -206,72 +206,72 @@ model Game {
    railway up
    ```
 
-## 🚂 Railway Deployment (Recommended)
+## 🚀 Vercel Deployment
 
-Railway is the **recommended deployment platform** for GoodGame? due to its excellent support for full-stack Next.js applications with databases.
+Vercel provides excellent support for Next.js applications with built-in optimizations and global CDN distribution.
 
-### Why Railway?
+### Why Vercel?
 
-- ✅ **Full-stack support**: Frontend, API routes, database, cron jobs
-- ✅ **Managed PostgreSQL**: Zero-config database setup
-- ✅ **Next.js optimized**: Automatic builds and deployments
-- ✅ **Environment management**: Secure variable handling
-- ✅ **Cron job support**: Native background task scheduling
+- ✅ **Next.js native**: Built by the same team behind Next.js
+- ✅ **Global CDN**: Fast worldwide distribution
+- ✅ **Automatic deployments**: Deploy on every Git push
+- ✅ **Preview deployments**: Test changes before production
+- ✅ **Analytics**: Built-in performance monitoring
 
-### Railway Setup Steps:
+### Vercel Setup Steps:
 
-1. **Create Railway Account:**
-   - Sign up at [railway.app](https://railway.app)
+1. **Create Vercel Account:**
+   - Sign up at [vercel.com](https://vercel.com)
    - Connect your GitHub account
 
 2. **Deploy from GitHub:**
-   - Connect repository: `https://github.com/bohselecta/good-game.git`
-   - Railway auto-detects Next.js and Prisma
+   - Import repository: `https://github.com/bohselecta/good-game.git`
+   - Vercel auto-detects Next.js
 
 3. **Database Setup:**
-   - Railway automatically provisions PostgreSQL
-   - Database URL is automatically set as `DATABASE_URL`
+   - Vercel doesn't provide databases, so we use SQLite
+   - Database file is created during build process
 
 4. **Environment Variables:**
-   In Railway dashboard → Variables:
+   In Vercel dashboard → Settings → Environment Variables:
    ```env
+   DATABASE_URL=file:./dev.db
    DEEPSEEK_API_KEY=your-deepseek-api-key-here
    ADMIN_PASSWORD=your-admin-password-here
    CRON_SECRET=your-cron-secret-here
    NODE_ENV=production
    ```
 
-5. **Database Migration:**
-   Railway automatically runs:
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
+5. **Build Settings:**
+   Vercel automatically detects:
+   - Build command: `npm run build`
+   - Output directory: `.next`
+   - Install command: `npm install`
 
 6. **Cron Jobs:**
-   Railway supports cron jobs. Add this to your Railway project:
-   ```bash
-   # Install Railway CLI
-   npm install -g @railway/cli
-   railway login
-
-   # Create cron job to hit /api/cron every hour
-   railway run --service your-service-name "curl -X GET https://your-app.railway.app/api/cron -H 'Authorization: Bearer YOUR_CRON_SECRET'"
+   Vercel's cron jobs work with the `/api/cron` endpoint:
+   ```json
+   {
+     "crons": [
+       {
+         "path": "/api/cron",
+         "schedule": "0 * * * *"
+       }
+     ]
+   }
    ```
 
-### Railway vs Other Platforms:
+### Vercel Features:
 
-| Feature | Railway | Vercel | Render |
-|---------|---------|--------|--------|
-| Next.js Support | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Database | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Cron Jobs | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ |
-| Free Tier | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Setup Complexity | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+- **Preview Deployments**: Every PR gets a unique URL
+- **Custom Domains**: Easy domain setup
+- **Analytics**: Real-time performance metrics
+- **Edge Functions**: Global API execution
+- **Rollback**: Instant rollback to previous versions
 
-**Railway URLs:**
-- **Dashboard**: https://railway.app/dashboard
-- **Docs**: https://docs.railway.app/
+**Vercel URLs:**
+- **Dashboard**: https://vercel.com/dashboard
+- **Docs**: https://vercel.com/docs
 
 ## 🧪 Testing
 
