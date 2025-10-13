@@ -40,6 +40,7 @@ interface ApiGameResponse {
 export default function HomePage() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     async function fetchGames() {
@@ -67,6 +68,33 @@ export default function HomePage() {
 
     fetchGames();
   }, []);
+
+  const triggerAnalysis = async () => {
+    setAnalyzing(true);
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: 'AdminPass123!' }), // Using the password the user set
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Analysis complete! ${data.message}`);
+        // Refresh the games list
+        window.location.reload();
+      } else {
+        const error = await res.json();
+        alert(`Analysis failed: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      alert(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -105,19 +133,53 @@ export default function HomePage() {
             <p className="text-gray-500 mb-6">
               We&apos;re working on analyzing recent games. Check back soon!
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
-              <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Games are analyzed automatically every hour.
-                You can also manually trigger analysis from the admin panel.
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto mb-6">
+              <p className="text-sm text-blue-800 mb-4">
+                <strong>Note:</strong> Games are analyzed automatically daily.
+                You can also manually trigger analysis below.
               </p>
+              <button
+                onClick={triggerAnalysis}
+                disabled={analyzing}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                {analyzing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Analyzing Games...
+                  </>
+                ) : (
+                  <>
+                    🔄 Refresh Analysis
+                  </>
+                )}
+              </button>
             </div>
           </div>
         ) : (
           <>
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Recent Games ({games.length})
-              </h2>
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Recent Games ({games.length})
+                </h2>
+                <button
+                  onClick={triggerAnalysis}
+                  disabled={analyzing}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm"
+                >
+                  {analyzing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      🔄 Refresh
+                    </>
+                  )}
+                </button>
+              </div>
               <p className="text-gray-600">
                 Click on any game to reveal spoilers progressively
               </p>
