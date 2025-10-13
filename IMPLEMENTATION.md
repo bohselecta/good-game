@@ -249,16 +249,30 @@ Vercel provides excellent support for Next.js applications with built-in optimiz
    - Install command: `npm install`
 
 6. **Cron Jobs:**
-   Vercel's cron jobs work with the `/api/cron` endpoint:
+   Vercel's cron jobs work with the `/api/cron` endpoint (runs daily at 9 AM UTC):
    ```json
    {
      "crons": [
        {
          "path": "/api/cron",
-         "schedule": "0 * * * *"
+         "schedule": "0 9 * * *"
        }
      ]
    }
+   ```
+
+   **Note:** Free Vercel accounts are limited to one cron job per day. The schedule runs at 9 AM UTC daily. For more frequent analysis, consider:
+
+   - **Upgrade to Vercel Pro**: Unlock unlimited cron jobs for $20/month
+   - **External Cron Service**: Use Cron-Job.org, EasyCron, or similar services to call your `/api/cron` endpoint
+   - **Manual Triggers**: Use the admin endpoint `/api/analyze` to trigger analysis manually
+
+   **Example with Cron-Job.org:**
+   ```
+   URL: https://your-app.vercel.app/api/cron
+   Method: GET
+   Headers: Authorization: Bearer YOUR_CRON_SECRET
+   Schedule: Every hour (0 * * * *)
    ```
 
 ### Vercel Features:
