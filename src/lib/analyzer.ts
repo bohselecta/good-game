@@ -53,15 +53,15 @@ export async function analyzeAllGames() {
     }
 
       // Check if already analyzed
+      const checkGameId = `${game.sport}-${game.homeTeam}-${game.awayTeam}-${game.gameDate}`.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+
       const { data: existingGames } = await supabase
         .from('Game')
         .select('id, analysis')
-        .eq('homeTeam', game.homeTeam)
-        .eq('awayTeam', game.awayTeam)
-        .eq('gameDate', new Date(game.gameDate))
+        .eq('id', checkGameId)
         .limit(1);
 
-      const existing = existingGames?.[0] as { id: string; analysis: string | null } | undefined;
+      const existing = existingGames?.[0];
 
       if (existing?.analysis) {
         console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
@@ -86,8 +86,12 @@ export async function analyzeAllGames() {
         // Determine winner
         const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
 
+        // Generate a unique ID for the game
+        const gameId = `${game.sport}-${game.homeTeam}-${game.awayTeam}-${game.gameDate}`.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+
           // Save to database using Supabase
           const gameData = {
+            id: gameId,
             sport: game.sport,
             league: game.league,
             homeTeam: game.homeTeam,
