@@ -111,9 +111,9 @@ export async function analyzeAllGames() {
 
         if (existing?.id) {
           // Update existing game
-          const { error: updateError } = await supabase
+          const { error: updateError } = await (supabase
             .from('Game')
-            .update(gameData as Record<string, unknown>)
+            .update(gameData) as any)
             .eq('id', existing.id);
 
           if (updateError) {
@@ -121,9 +121,9 @@ export async function analyzeAllGames() {
           }
         } else {
           // Create new game
-          const { error: insertError } = await supabase
+          const { error: insertError } = await (supabase
             .from('Game')
-            .insert(gameData as Record<string, unknown>);
+            .insert(gameData) as any);
 
           if (insertError) {
             throw new Error(`Failed to insert game: ${insertError.message}`);
