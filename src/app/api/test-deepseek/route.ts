@@ -23,7 +23,7 @@ export async function GET() {
     // Test the API with a simple request
     const completion = await openai.chat.completions.create({
       model: 'deepseek-reasoner',
-      messages: [{ role: 'user', content: 'Hello, respond with {"test": "success"}' }],
+      messages: [{ role: 'user', content: 'Hello, respond with JSON format: {"test": "success"}' }],
       temperature: 0.0,
       response_format: { type: 'json_object' }
     });

@@ -114,7 +114,7 @@ RATING SCALE:
 2: Very one-sided (not worth your time)
 1: Complete blowout, skip it (waste of time)
 
-RESPOND IN JSON (no markdown, just pure JSON):
+RESPOND IN JSON FORMAT (no markdown, just pure JSON):
 {
   "qualityScore": <1-10 integer>,
   "isClose": <boolean - was margin within 1-2 possessions?>,
