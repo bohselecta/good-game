@@ -30,7 +30,6 @@ type SortOption = 'date' | 'quality' | 'excitement';
 export default function HomePage() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
   const [selectedSports, setSelectedSports] = useState<Sport[]>(['NBA', 'NFL', 'MLB', 'NHL', 'Soccer', 'UFC']);
   const [sortBy, setSortBy] = useState<SortOption>('date');
 
@@ -57,32 +56,6 @@ export default function HomePage() {
     fetchGames();
   }, []);
 
-  const triggerAnalysis = async () => {
-    setAnalyzing(true);
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password: 'AdminPass123!' }), // Using the password the user set
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        alert(`Analysis complete! ${data.message}`);
-        // Refresh the games list
-        window.location.reload();
-      } else {
-        const error = await res.json();
-        alert(`Analysis failed: ${error.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      alert(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
 
   // Filter and sort games
   const filteredAndSortedGames = useMemo(() => {
@@ -120,7 +93,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Header onRefresh={triggerAnalysis} analyzing={analyzing} />
+      <Header />
       <main className="page">
         {games.length === 0 ? (
           <div className="empty-state">
@@ -140,25 +113,8 @@ export default function HomePage() {
             <div style={{background: 'var(--gg-panel)', border: '1px solid var(--gg-border)', borderRadius: 'var(--r-lg)', padding: '20px', maxWidth: '400px', margin: '0 auto'}}>
               <p className="subtle" style={{marginBottom: '16px'}}>
                 <strong>Note:</strong> Games are analyzed automatically daily.
-                You can also manually trigger analysis below.
+                Check back soon for the latest game reviews!
               </p>
-              <button
-                onClick={triggerAnalysis}
-                disabled={analyzing}
-                className="btn"
-                style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}
-              >
-                {analyzing ? (
-                  <>
-                    <div className="spinner" style={{width: '16px', height: '16px', borderWidth: '2px'}}></div>
-                    Analyzing Games...
-                  </>
-                ) : (
-                  <>
-                    🔄 Refresh Analysis
-                  </>
-                )}
-              </button>
             </div>
           </div>
         ) : (

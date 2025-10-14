@@ -3,50 +3,100 @@ import { supabase } from './supabase';
 import { analyzeGame } from './deepseek';
 import { fetchNFLGames, fetchNBAGames, fetchSoccerGames, getTodayDate, getYesterdayDate, getDaysAgoDate } from './sports-api';
 
-export async function analyzeAllGames(limit: number = 3) {
-  console.log(`🔍 Analyzing up to ${limit} games for testing...`);
+// Generate date range from last analysis date or recent days
+function getDateRangeForAnalysis(lastAnalysisDate: Date | null): string[] {
+  const dates: string[] = [];
 
-  // For testing, only fetch from the last 2 days to keep it fast
-  const yesterday = getYesterdayDate();
-  const today = getTodayDate();
+  if (lastAnalysisDate) {
+    // Get dates from last analysis until today
+    const today = new Date();
+    let currentDate = new Date(lastAnalysisDate);
 
-  console.log(`Fetching games from: ${yesterday} to ${today}`);
+    // Add one day to last analysis date to avoid re-analyzing
+    currentDate.setDate(currentDate.getDate() + 1);
+
+    while (currentDate <= today) {
+      dates.push(currentDate.toISOString().split('T')[0].replace(/-/g, ''));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  } else {
+    // No previous analysis, get last 7 days
+    for (let i = 6; i >= 0; i--) {
+      dates.push(getDaysAgoDate(i));
+    }
+  }
+
+  return dates;
+}
+
+// Get fetch function for a specific sport
+function getSportFetchFunction(sport: string) {
+  switch (sport.toLowerCase()) {
+    case 'nfl':
+      return fetchNFLGames;
+    case 'nba':
+      return fetchNBAGames;
+    case 'soccer':
+      return (date: string) => fetchSoccerGames('premier-league', date); // Default to Premier League
+    default:
+      console.log(`⚠️  ${sport} not yet implemented, skipping`);
+      return null;
+  }
+}
+
+export async function analyzeGamesBySport(selectedSport: string, lastAnalysisDate: Date | null, limit: number = 50) {
+  console.log(`🔍 Analyzing ${selectedSport === 'all' ? 'all sports' : selectedSport} games...`);
+
+  const dateRange = getDateRangeForAnalysis(lastAnalysisDate);
+  console.log(`📅 Analyzing games from ${dateRange.length} days: ${dateRange[0]} to ${dateRange[dateRange.length - 1]}`);
 
   try {
-    // Fetch games from multiple sports (only yesterday and today for speed)
-    const nflGames = await Promise.all([
-      fetchNFLGames(yesterday),
-      fetchNFLGames(today)
-    ]);
+    const allGames: any[] = [];
 
-    const nbaGames = await Promise.all([
-      fetchNBAGames(yesterday),
-      fetchNBAGames(today)
-    ]);
+    if (selectedSport === 'all') {
+      // Analyze all available sports
+      const sports = ['NFL', 'NBA', 'Soccer'];
 
-    const allGames = [
-      ...nflGames.flat(),
-      ...nbaGames.flat()
-    ];
+      for (const sport of sports) {
+        const fetchFunction = getSportFetchFunction(sport);
+        if (!fetchFunction) continue;
 
-    console.log(`Found ${allGames.length} games to analyze`);
+        console.log(`🏈 Fetching ${sport} games...`);
+        const sportGames = await Promise.all(dateRange.map(date => fetchFunction(date)));
+        allGames.push(...sportGames.flat());
+      }
+    } else {
+      // Analyze specific sport
+      const fetchFunction = getSportFetchFunction(selectedSport);
+      if (!fetchFunction) {
+        console.log(`❌ ${selectedSport} not supported yet`);
+        return { analyzedCount: 0, totalGames: 0 };
+      }
 
-    // Limit to the specified number for testing
-    const gamesToAnalyze = allGames.slice(0, limit);
-    console.log(`Will analyze ${gamesToAnalyze.length} games (limited for testing)`);
+      console.log(`🏈 Fetching ${selectedSport} games...`);
+      const sportGames = await Promise.all(dateRange.map(date => fetchFunction(date)));
+      allGames.push(...sportGames.flat());
+    }
+
+    console.log(`📊 Found ${allGames.length} total games to check`);
+
+    // Filter to only completed games
+    const completedGames = allGames.filter(game => game.status === 'post' || game.status === 'STATUS_FINAL');
+    console.log(`✅ ${completedGames.length} completed games to analyze`);
+
+    // Limit for performance
+    const gamesToAnalyze = completedGames.slice(0, limit);
+    if (completedGames.length > limit) {
+      console.log(`⚡ Limiting to ${limit} games for performance`);
+    }
 
     let analyzedCount = 0;
 
     for (const game of gamesToAnalyze) {
-      // Only analyze finished games
-      if (game.status !== 'post') {
-        console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - status: ${game.status}`);
-        continue;
-      }
-
-      // Check if already analyzed
+      // Generate unique game ID
       const checkGameId = `${game.sport}-${game.homeTeam}-${game.awayTeam}-${game.gameDate}`.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
 
+      // Check if already analyzed
       const { data: existingGames } = await supabase
         .from('Game')
         .select('id, analysis')
@@ -56,14 +106,14 @@ export async function analyzeAllGames(limit: number = 3) {
       const existing = existingGames?.[0];
 
       if (existing?.analysis) {
-        console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
+        console.log(`⏭️  Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
         continue;
       }
 
       try {
-        console.log(`Analyzing ${game.sport}: ${game.homeTeam} vs ${game.awayTeam}`);
+        console.log(`🤖 Analyzing ${game.sport}: ${game.homeTeam} vs ${game.awayTeam}`);
 
-        // Get AI analysis with enhanced logic
+        // Get AI analysis
         const analysis = await analyzeGame({
           sport: game.sport,
           homeTeam: game.homeTeam,
@@ -78,12 +128,9 @@ export async function analyzeAllGames(limit: number = 3) {
         // Determine winner
         const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
 
-        // Generate a unique ID for the game
-        const gameId = `${game.sport}-${game.homeTeam}-${game.awayTeam}-${game.gameDate}`.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
-
-        // Save to database using Supabase
+        // Prepare game data
         const gameData = {
-          id: gameId,
+          id: checkGameId,
           sport: game.sport,
           league: game.league,
           homeTeam: game.homeTeam,
@@ -124,7 +171,7 @@ export async function analyzeAllGames(limit: number = 3) {
         analyzedCount++;
         console.log(`✅ Analyzed ${game.homeTeam} vs ${game.awayTeam} - Score: ${analysis.qualityScore}/10 (${analysis.recommendation})`);
 
-        // Add delay to avoid rate limiting
+        // Rate limiting delay
         await new Promise(resolve => setTimeout(resolve, 2000));
 
       } catch (error) {
@@ -132,13 +179,19 @@ export async function analyzeAllGames(limit: number = 3) {
       }
     }
 
-    console.log(`Analysis complete! Analyzed ${analyzedCount} new games.`);
+    console.log(`\n🎉 Analysis complete! Analyzed ${analyzedCount} new games.`);
     return { analyzedCount, totalGames: gamesToAnalyze.length };
 
   } catch (error) {
-    console.error('❌ Error in analyzeAllGames:', error);
+    console.error('❌ Error in analyzeGamesBySport:', error);
     return { analyzedCount: 0, totalGames: 0, error: error.message };
   }
+}
+
+// Legacy function for backward compatibility
+export async function analyzeAllGames(limit: number = 3) {
+  console.log('⚠️  Using legacy analyzeAllGames function - consider using analyzeGamesBySport instead');
+  return analyzeGamesBySport('all', null, limit);
 }
 
 // Function to get recent games for display
