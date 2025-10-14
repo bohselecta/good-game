@@ -91,22 +91,26 @@ export async function analyzeAllGames() {
         // Determine winner
         const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
 
-        // Save to database using Supabase
-        const gameData = {
-          sport: game.sport,
-          league: game.league,
-          homeTeam: game.homeTeam,
-          awayTeam: game.awayTeam,
-          gameDate: game.gameDate,
-          status: 'final',
-          qualityScore: analysis.qualityScore,
-          isClose: analysis.isClose,
-          excitement: analysis.excitement,
-          analysis: analysis.analysis,
-          leadChanges: analysis.leadChanges,
-          finalScore: `${game.homeScore}-${game.awayScore}`,
-          winner: winner
-        };
+          // Generate a unique ID for the game
+          const gameId = `${game.sport}-${game.homeTeam}-${game.awayTeam}-${game.gameDate}`.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+
+          // Save to database using Supabase
+          const gameData = {
+            id: gameId,
+            sport: game.sport,
+            league: game.league,
+            homeTeam: game.homeTeam,
+            awayTeam: game.awayTeam,
+            gameDate: game.gameDate,
+            status: 'final',
+            qualityScore: analysis.qualityScore,
+            isClose: analysis.isClose,
+            excitement: analysis.excitement,
+            analysis: analysis.analysis,
+            leadChanges: analysis.leadChanges,
+            finalScore: `${game.homeScore}-${game.awayScore}`,
+            winner: winner
+          };
 
         if (existing?.id) {
           // Update existing game
