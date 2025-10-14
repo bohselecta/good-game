@@ -62,6 +62,12 @@ export async function analyzeGame(gameData: {
   stats: Record<string, unknown>;
   status?: string;
 }): Promise<GameAnalysis> {
+  // Check if API key is available
+  if (!process.env.DEEPSEEK_API_KEY) {
+    console.error('DEEPSEEK_API_KEY environment variable is not set');
+    throw new Error('DeepSeek API key is not configured');
+  }
+
   const metrics = calculateGameMetrics(gameData);
 
   const prompt = `You are an expert sports analyst specializing in game watchability. Analyze this ${gameData.sport} game and provide detailed insights for someone deciding whether to watch a recorded game.
@@ -132,11 +138,31 @@ CRITICAL RULES:
       })
     });
 
+    console.log('DeepSeek API response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('DeepSeek API error response:', errorText);
+      throw new Error(`DeepSeek API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log('DeepSeek API response text:', responseText.substring(0, 200) + '...');
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse DeepSeek response as JSON:', parseError);
+      console.error('Response text:', responseText);
+      throw new Error(`Invalid JSON response from DeepSeek API: ${responseText.substring(0, 100)}`);
+    }
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid DeepSeek response structure:', data);
+      throw new Error('Invalid response structure from DeepSeek API');
+    }
+
     const analysis: GameAnalysis = JSON.parse(data.choices[0].message.content);
 
     // Post-AI validation and adjustment logic
