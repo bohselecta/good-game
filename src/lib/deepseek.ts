@@ -4,7 +4,7 @@ export interface GameAnalysis {
   isClose: boolean;
   excitement: 'blowout' | 'competitive' | 'thriller';
   analysis: string; // 2-3 sentence spoiler-free description
-  leadChanges: number;
+  leadChanges: number | null;
   recommendation?: 'Must Watch' | 'Worth Watching' | 'Maybe Skip' | 'Skip';
 }
 
