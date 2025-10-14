@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/analyzer.ts
 import { supabase } from './supabase';
 import { analyzeGame } from './deepseek';
@@ -112,9 +111,10 @@ export async function analyzeAllGames() {
 
         if (existing?.id) {
           // Update existing game
-          const { error: updateError } = await (supabase
+          // @ts-ignore
+          const { error: updateError } = await supabase
             .from('Game')
-            .update(gameData) as any)
+            .update(gameData)
             .eq('id', existing.id);
 
           if (updateError) {
@@ -122,9 +122,10 @@ export async function analyzeAllGames() {
           }
         } else {
           // Create new game
-          const { error: insertError } = await (supabase
+          // @ts-ignore
+          const { error: insertError } = await supabase
             .from('Game')
-            .insert(gameData) as any);
+            .insert(gameData);
 
           if (insertError) {
             throw new Error(`Failed to insert game: ${insertError.message}`);
