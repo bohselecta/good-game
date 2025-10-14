@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "analyze": "tsx scripts/analyze-local.ts"
+    "analyze": "tsx scripts/analyze-local.ts",
+    "sample-data": "tsx scripts/add-sample-data.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
