@@ -58,10 +58,10 @@ export async function analyzeAllGames() {
         .select('id, analysis')
         .eq('homeTeam', game.homeTeam)
         .eq('awayTeam', game.awayTeam)
-        .eq('gameDate', game.gameDate)
+        .eq('gameDate', new Date(game.gameDate))
         .limit(1);
 
-      const existing = existingGames?.[0] as { id: string; analysis: string | null } | undefined;
+      const existing = existingGames?.[0];
 
       if (existing?.analysis) {
         console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
@@ -86,17 +86,13 @@ export async function analyzeAllGames() {
         // Determine winner
         const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
 
-          // Generate a unique ID for the game
-          const gameId = `${game.sport}-${game.homeTeam}-${game.awayTeam}-${game.gameDate}`.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
-
           // Save to database using Supabase
           const gameData = {
-            id: gameId,
             sport: game.sport,
             league: game.league,
             homeTeam: game.homeTeam,
             awayTeam: game.awayTeam,
-            gameDate: game.gameDate,
+            gameDate: new Date(game.gameDate),
             status: 'final',
             qualityScore: analysis.qualityScore,
             isClose: analysis.isClose,
@@ -104,17 +100,14 @@ export async function analyzeAllGames() {
             analysis: analysis.analysis,
             leadChanges: analysis.leadChanges,
             finalScore: `${game.homeScore}-${game.awayScore}`,
-            winner: winner,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            winner: winner
           };
 
         if (existing?.id) {
           // Update existing game
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { error: updateError } = await supabase
             .from('Game')
-            .update(gameData as any)
+            .update(gameData)
             .eq('id', existing.id);
 
           if (updateError) {
@@ -122,10 +115,9 @@ export async function analyzeAllGames() {
           }
         } else {
           // Create new game
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { error: insertError } = await supabase
             .from('Game')
-            .insert(gameData as any);
+            .insert(gameData);
 
           if (insertError) {
             throw new Error(`Failed to insert game: ${insertError.message}`);
