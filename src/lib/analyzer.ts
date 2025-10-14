@@ -60,6 +60,7 @@ export async function analyzeAllGames() {
   });
 
   let analyzedCount = 0;
+  let forceReanalyzeCount = 0; // For testing, re-analyze first few games
 
   for (const game of allGames) {
     // Only analyze finished games
@@ -68,7 +69,7 @@ export async function analyzeAllGames() {
       continue;
     }
 
-    // Check if already analyzed
+    // Check if already analyzed with real AI (not dummy data)
     const existing = await prisma.game.findFirst({
       where: {
         homeTeam: game.homeTeam,
@@ -77,9 +78,17 @@ export async function analyzeAllGames() {
       }
     });
 
-    if (existing?.analysis) {
+    // For testing: Force re-analyze first 3 games to test new AI logic
+    const shouldSkip = existing?.analysis && forceReanalyzeCount >= 3;
+
+    if (shouldSkip) {
       console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
       continue; // Already analyzed
+    }
+
+    if (existing?.analysis && forceReanalyzeCount < 3) {
+      console.log(`🔄 Re-analyzing ${game.homeTeam} vs ${game.awayTeam} with new AI logic`);
+      forceReanalyzeCount++;
     }
 
     try {
