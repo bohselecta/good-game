@@ -1,5 +1,5 @@
 // app/api/games/route.ts
-import { getRecentGames } from '../../../lib/analyzer';
+import { getGamesFromSupabase } from '../../../lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '50');
 
     console.log('Fetching games with limit:', limit);
-    const games = await getRecentGames(limit);
+    const games = await getGamesFromSupabase(limit);
     console.log('Found games:', games.length);
 
     return NextResponse.json({
