@@ -61,7 +61,7 @@ export async function analyzeAllGames() {
         .eq('gameDate', new Date(game.gameDate))
         .limit(1);
 
-      const existing = existingGames?.[0];
+      const existing = existingGames?.[0] as { id: string; analysis: string | null } | undefined;
 
       if (existing?.analysis) {
         console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
