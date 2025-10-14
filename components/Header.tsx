@@ -6,12 +6,12 @@ export default function Header({ onRefresh, analyzing }: { onRefresh?: () => voi
           <img 
             src="/logo.png" 
             alt="GoodGame?" 
-            width="34" 
-            height="34"
+            width="68" 
+            height="68"
             style={{ borderRadius: '10px' }}
           />
         </span>
-        GoodGame<span style={{opacity:.7}}>?</span>
+        GoodGame?
       </div>
       <div className="controls">
         <button 
