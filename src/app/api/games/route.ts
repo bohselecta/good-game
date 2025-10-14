@@ -7,7 +7,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
 
+    console.log('Fetching games with limit:', limit);
     const games = await getRecentGames(limit);
+    console.log('Found games:', games.length);
 
     return NextResponse.json({
       games,
@@ -15,8 +17,15 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Error fetching games:', error);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+    
     return NextResponse.json(
-      { error: 'Failed to fetch games', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Failed to fetch games', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

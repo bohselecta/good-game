@@ -146,13 +146,21 @@ export async function analyzeAllGames() {
 
 // Function to get recent games for display
 export async function getRecentGames(limit: number = 50) {
-  return await prisma.game.findMany({
-    orderBy: { gameDate: 'desc' },
-    take: limit,
-    where: {
-      analysis: { not: null } // Only show analyzed games
-    }
-  });
+  try {
+    console.log('Getting recent games from database...');
+    const games = await prisma.game.findMany({
+      orderBy: { gameDate: 'desc' },
+      take: limit,
+      where: {
+        analysis: { not: null } // Only show analyzed games
+      }
+    });
+    console.log(`Found ${games.length} analyzed games in database`);
+    return games;
+  } catch (error) {
+    console.error('Database error in getRecentGames:', error);
+    throw new Error(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 // Function to get a specific game by ID
