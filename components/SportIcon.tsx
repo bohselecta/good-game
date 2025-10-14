@@ -12,7 +12,7 @@ export default function SportIcon({ sport }: { sport: Sport }) {
       </svg>
     ),
     NFL: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style={{ transform: 'rotate(30deg)' }}>
         {/* American Football */}
         <ellipse cx="12" cy="12" rx="8" ry="5" stroke="#8b4513" strokeWidth="2" fill="#8b4513" opacity="0.1"/>
         <path d="M4 12c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4s-1.8 4-4 4H8c-2.2 0-4-1.8-4-4z" stroke="#8b4513" strokeWidth="1.5"/>
