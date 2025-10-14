@@ -298,3 +298,113 @@ a:focus-visible, .btn:focus-visible, .card:focus-visible {
   color: var(--gg-ink-dim);
   margin-bottom: 24px;
 }
+
+/* Filter and Sort Controls */
+.filters-section {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--gg-panel);
+  border: 1px solid var(--gg-border);
+  border-radius: var(--r-lg);
+}
+
+.sport-filter, .sort-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--gg-ink);
+}
+
+.sport-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.sport-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.sport-checkbox:hover {
+  background: var(--gg-panel-2);
+}
+
+.sport-checkbox input[type="checkbox"] {
+  accent-color: var(--gg-lime);
+}
+
+.sport-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gg-ink);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.filter-btn-small {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--gg-panel-2);
+  color: var(--gg-ink);
+  border: 1px solid var(--gg-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn-small:hover {
+  background: var(--card-hover);
+  transform: translateY(-1px);
+}
+
+.sort-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--gg-panel-2);
+  color: var(--gg-ink);
+  border: 1px solid var(--gg-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-select:hover {
+  background: var(--card-hover);
+  border-color: var(--gg-lime);
+}
+
+.sort-select:focus {
+  outline: 2px solid var(--gg-lime);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .filters-section {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .sport-checkboxes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

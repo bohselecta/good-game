@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '../../components/Header';
 import GameCard from '../../components/GameCard';
+import SportFilter from '../../components/SportFilter';
+import SortFilter from '../../components/SortFilter';
 
 interface Game {
   id: string;
@@ -38,10 +40,15 @@ interface ApiGameResponse {
   leadChanges?: number;
 }
 
+type Sport = "NBA"|"NFL"|"MLB"|"NHL"|"Soccer"|"UFC";
+type SortOption = 'date' | 'quality' | 'excitement';
+
 export default function HomePage() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [selectedSports, setSelectedSports] = useState<Sport[]>(['NBA', 'NFL', 'MLB', 'NHL', 'Soccer', 'UFC']);
+  const [sortBy, setSortBy] = useState<SortOption>('date');
 
   useEffect(() => {
     async function fetchGames() {
@@ -93,6 +100,31 @@ export default function HomePage() {
     }
   };
 
+  // Filter and sort games
+  const filteredAndSortedGames = useMemo(() => {
+    let filtered = games.filter(game => 
+      selectedSports.length === 0 || selectedSports.includes(game.league as Sport)
+    );
+
+    // Sort games
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'date':
+          return new Date(b.gameDate).getTime() - new Date(a.gameDate).getTime();
+        case 'quality':
+          return (b.qualityScore || 0) - (a.qualityScore || 0);
+        case 'excitement':
+          const excitementOrder = { 'thriller': 3, 'competitive': 2, 'blowout': 1 };
+          return (excitementOrder[b.excitement as keyof typeof excitementOrder] || 0) - 
+                 (excitementOrder[a.excitement as keyof typeof excitementOrder] || 0);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [games, selectedSports, sortBy]);
+
   if (loading) {
     return (
       <div className="loading">
@@ -139,10 +171,23 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <h2 className="section-title">Recent Games ({games.length})</h2>
+            <h2 className="section-title">Recent Games ({filteredAndSortedGames.length})</h2>
             <p className="subtle">Click any card to progressively reveal spoilers</p>
+            
+            {/* Filter and Sort Controls */}
+            <div className="filters-section">
+              <SportFilter 
+                selectedSports={selectedSports}
+                onSportsChange={setSelectedSports}
+              />
+              <SortFilter 
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+              />
+            </div>
+
             <div className="grid">
-              {games.map((game) => (
+              {filteredAndSortedGames.map((game) => (
                 <GameCard key={game.id} game={game} />
               ))}
             </div>
