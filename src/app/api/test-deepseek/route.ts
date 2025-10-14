@@ -1,4 +1,5 @@
 // app/api/test-deepseek/route.ts
+import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -13,29 +14,27 @@ export async function GET() {
       });
     }
 
-    // Test the API with a simple request
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [{ role: 'user', content: 'Hello, respond with {"test": "success"}' }],
-        temperature: 0.3,
-        response_format: { type: 'json_object' }
-      })
+    // Initialize OpenAI client with DeepSeek configuration
+    const openai = new OpenAI({
+      baseURL: 'https://api.deepseek.com',
+      apiKey: apiKey,
     });
 
-    const responseText = await response.text();
+    // Test the API with a simple request
+    const completion = await openai.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [{ role: 'user', content: 'Hello, respond with {"test": "success"}' }],
+      temperature: 0.3,
+      response_format: { type: 'json_object' }
+    });
+
+    const responseContent = completion.choices[0].message.content;
     
     return NextResponse.json({
-      status: response.ok ? 'success' : 'error',
+      status: 'success',
       hasApiKey: true,
       apiKeyPrefix: apiKey.substring(0, 10) + '...',
-      responseStatus: response.status,
-      responseText: responseText.substring(0, 200),
+      responseContent: responseContent,
       timestamp: new Date().toISOString()
     });
   } catch (error) {

@@ -1,4 +1,12 @@
 // lib/deepseek.ts
+import OpenAI from 'openai';
+
+// Initialize OpenAI client with DeepSeek configuration
+const openai = new OpenAI({
+  baseURL: 'https://api.deepseek.com',
+  apiKey: process.env.DEEPSEEK_API_KEY,
+});
+
 export interface GameAnalysis {
   qualityScore: number; // 1-10
   isClose: boolean;
@@ -124,46 +132,30 @@ CRITICAL RULES:
 - Make it helpful for someone deciding whether to watch a recorded game`;
 
   try {
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
-        response_format: { type: 'json_object' }
-      })
+    console.log('Calling DeepSeek API with OpenAI SDK...');
+    
+    const completion = await openai.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+      response_format: { type: 'json_object' }
     });
 
-    console.log('DeepSeek API response status:', response.status);
+    console.log('DeepSeek API response received');
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('DeepSeek API error response:', errorText);
-      throw new Error(`DeepSeek API error: ${response.status} ${response.statusText} - ${errorText}`);
-    }
-
-    const responseText = await response.text();
-    console.log('DeepSeek API response text:', responseText.substring(0, 200) + '...');
-    
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('Failed to parse DeepSeek response as JSON:', parseError);
-      console.error('Response text:', responseText);
-      throw new Error(`Invalid JSON response from DeepSeek API: ${responseText.substring(0, 100)}`);
-    }
-
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      console.error('Invalid DeepSeek response structure:', data);
+    if (!completion.choices || !completion.choices[0] || !completion.choices[0].message) {
+      console.error('Invalid DeepSeek response structure:', completion);
       throw new Error('Invalid response structure from DeepSeek API');
     }
 
-    const analysis: GameAnalysis = JSON.parse(data.choices[0].message.content);
+    const responseContent = completion.choices[0].message.content;
+    console.log('DeepSeek response content:', responseContent?.substring(0, 200) + '...');
+    
+    if (!responseContent) {
+      throw new Error('Empty response from DeepSeek API');
+    }
+
+    const analysis: GameAnalysis = JSON.parse(responseContent);
 
     // Post-AI validation and adjustment logic
     let finalScore = analysis.qualityScore;
