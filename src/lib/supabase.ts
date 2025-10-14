@@ -2,13 +2,29 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://hrpdelmrwdgqtngbzxcn.supabase.co'
-const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY
 
-if (!supabaseKey) {
-  throw new Error('Missing Supabase key. Please set SUPABASE_ANON_KEY or SUPABASE_KEY environment variable.')
+// Lazy initialization of Supabase client
+let supabaseClient: ReturnType<typeof createClient> | null = null
+
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY
+    
+    if (!supabaseKey) {
+      throw new Error('Missing Supabase key. Please set SUPABASE_ANON_KEY or SUPABASE_KEY environment variable.')
+    }
+    
+    supabaseClient = createClient(supabaseUrl, supabaseKey)
+  }
+  
+  return supabaseClient
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    return getSupabaseClient()[prop as keyof ReturnType<typeof createClient>]
+  }
+})
 
 // Helper function to get games using Supabase client
 export async function getGamesFromSupabase(limit: number = 50) {
