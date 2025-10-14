@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/analyzer.ts
 import { supabase } from './supabase';
 import { analyzeGame } from './deepseek';
@@ -111,7 +112,6 @@ export async function analyzeAllGames() {
 
         if (existing?.id) {
           // Update existing game
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { error: updateError } = await (supabase
             .from('Game')
             .update(gameData) as any)
@@ -122,7 +122,6 @@ export async function analyzeAllGames() {
           }
         } else {
           // Create new game
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { error: insertError } = await (supabase
             .from('Game')
             .insert(gameData) as any);
