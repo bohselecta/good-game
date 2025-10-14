@@ -61,7 +61,7 @@ export default function GameCard({ game }: { game: Game }) {
     >
       <div className="card-row">
         <div className="rail">
-          <SportIcon sport={game.league as any} />
+          <SportIcon sport={game.league as "NBA"|"NFL"|"MLB"|"NHL"|"Soccer"|"UFC"} />
           <LeaguePill league={game.league} />
         </div>
 
