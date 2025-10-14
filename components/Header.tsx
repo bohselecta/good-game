@@ -6,8 +6,8 @@ export default function Header({ onRefresh, analyzing }: { onRefresh?: () => voi
           <img 
             src="/logo.png" 
             alt="GoodGame?" 
-            width="68" 
-            height="68"
+            width="48" 
+            height="48"
             style={{ borderRadius: '10px' }}
           />
         </span>
