@@ -7,11 +7,6 @@ export async function analyzeAllGames() {
   const today = getTodayDate();
   const yesterday = getYesterdayDate();
   const twoDaysAgo = getDaysAgoDate(2);
-  const threeDaysAgo = getDaysAgoDate(3);
-  const fourDaysAgo = getDaysAgoDate(4);
-  const fiveDaysAgo = getDaysAgoDate(5);
-  const sixDaysAgo = getDaysAgoDate(6);
-  const sevenDaysAgo = getDaysAgoDate(7);
 
   console.log(`Analyzing games for the past 3 days: ${twoDaysAgo} to ${today}`);
 
@@ -57,21 +52,21 @@ export async function analyzeAllGames() {
       continue;
     }
 
-    // Check if already analyzed
-    const { data: existingGames } = await supabase
-      .from('Game')
-      .select('id, analysis')
-      .eq('homeTeam', game.homeTeam)
-      .eq('awayTeam', game.awayTeam)
-      .eq('gameDate', game.gameDate)
-      .limit(1);
+      // Check if already analyzed
+      const { data: existingGames } = await supabase
+        .from('Game')
+        .select('id, analysis')
+        .eq('homeTeam', game.homeTeam)
+        .eq('awayTeam', game.awayTeam)
+        .eq('gameDate', game.gameDate)
+        .limit(1);
 
-    const existing = existingGames?.[0];
+      const existing = existingGames?.[0] as { id: string; analysis: string | null } | undefined;
 
-    if (existing?.analysis) {
-      console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
-      continue; // Already analyzed
-    }
+      if (existing?.analysis) {
+        console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
+        continue; // Already analyzed
+      }
 
     try {
       console.log(`Analyzing ${game.sport}: ${game.homeTeam} vs ${game.awayTeam}`);
