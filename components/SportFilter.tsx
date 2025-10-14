@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 type Sport = "NBA"|"NFL"|"MLB"|"NHL"|"Soccer"|"UFC";
 
 interface SportFilterProps {

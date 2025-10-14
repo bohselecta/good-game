@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 type SortOption = 'date' | 'quality' | 'excitement';
 
 interface SortFilterProps {

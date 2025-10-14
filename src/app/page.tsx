@@ -23,22 +23,6 @@ interface Game {
   leadChanges?: number;
 }
 
-interface ApiGameResponse {
-  id: string;
-  sport: string;
-  league: string;
-  homeTeam: string;
-  awayTeam: string;
-  gameDate: string;
-  status: string;
-  qualityScore?: number;
-  isClose?: boolean;
-  excitement?: string;
-  analysis?: string;
-  finalScore?: string;
-  winner?: string;
-  leadChanges?: number;
-}
 
 type Sport = "NBA"|"NFL"|"MLB"|"NHL"|"Soccer"|"UFC";
 type SortOption = 'date' | 'quality' | 'excitement';
@@ -102,7 +86,7 @@ export default function HomePage() {
 
   // Filter and sort games
   const filteredAndSortedGames = useMemo(() => {
-    let filtered = games.filter(game => 
+    const filtered = games.filter(game => 
       selectedSports.length === 0 || selectedSports.includes(game.league as Sport)
     );
 

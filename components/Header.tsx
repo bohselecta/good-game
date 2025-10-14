@@ -1,13 +1,15 @@
+import Image from 'next/image';
+
 export default function Header({ onRefresh, analyzing }: { onRefresh?: () => void; analyzing?: boolean }) {
   return (
     <header className="header">
       <div className="brand">
         <span className="mark" aria-label="GoodGame logo">
-          <img 
+          <Image 
             src="/logo.png" 
             alt="GoodGame?" 
-            width="56" 
-            height="56"
+            width={56} 
+            height={56}
             style={{ borderRadius: '10px' }}
           />
         </span>
