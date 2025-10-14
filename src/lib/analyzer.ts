@@ -85,14 +85,17 @@ export async function analyzeAllGames() {
     try {
       console.log(`Analyzing ${game.sport}: ${game.homeTeam} vs ${game.awayTeam}`);
 
-      // TEMPORARY: Skip DeepSeek analysis and use dummy data
-      const dummyAnalysis = {
-        qualityScore: Math.floor(Math.random() * 5) + 6, // 6-10
-        isClose: Math.random() > 0.5,
-        excitement: Math.random() > 0.5 ? 'thriller' : 'competitive',
-        analysis: `This was a ${Math.random() > 0.5 ? 'close' : 'competitive'} game between ${game.homeTeam} and ${game.awayTeam}.`,
-        leadChanges: Math.floor(Math.random() * 5)
-      };
+      // Get AI analysis with enhanced logic
+      const analysis = await analyzeGame({
+        sport: game.sport,
+        homeTeam: game.homeTeam,
+        awayTeam: game.awayTeam,
+        homeScore: game.homeScore,
+        awayScore: game.awayScore,
+        quarter: game.quarter,
+        stats: {}, // Could be expanded with more detailed stats
+        status: game.status
+      });
 
       // Determine winner
       const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
@@ -107,30 +110,30 @@ export async function analyzeAllGames() {
           awayTeam: game.awayTeam,
           gameDate: game.gameDate,
           status: 'final',
-          qualityScore: dummyAnalysis.qualityScore,
-          isClose: dummyAnalysis.isClose,
-          excitement: dummyAnalysis.excitement,
-          analysis: dummyAnalysis.analysis,
-          leadChanges: dummyAnalysis.leadChanges,
+          qualityScore: analysis.qualityScore,
+          isClose: analysis.isClose,
+          excitement: analysis.excitement,
+          analysis: analysis.analysis,
+          leadChanges: analysis.leadChanges,
           finalScore: `${game.homeScore}-${game.awayScore}`,
           winner: winner
         },
         update: {
-          qualityScore: dummyAnalysis.qualityScore,
-          isClose: dummyAnalysis.isClose,
-          excitement: dummyAnalysis.excitement,
-          analysis: dummyAnalysis.analysis,
-          leadChanges: dummyAnalysis.leadChanges,
+          qualityScore: analysis.qualityScore,
+          isClose: analysis.isClose,
+          excitement: analysis.excitement,
+          analysis: analysis.analysis,
+          leadChanges: analysis.leadChanges,
           finalScore: `${game.homeScore}-${game.awayScore}`,
           winner: winner
         }
       });
 
       analyzedCount++;
-      console.log(`✅ Analyzed ${game.homeTeam} vs ${game.awayTeam} - Score: ${dummyAnalysis.qualityScore}/10`);
+      console.log(`✅ Analyzed ${game.homeTeam} vs ${game.awayTeam} - Score: ${analysis.qualityScore}/10 (${analysis.recommendation})`);
 
       // Add a small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
     } catch (error) {
       console.error(`❌ Error analyzing ${game.homeTeam} vs ${game.awayTeam}:`, error);
