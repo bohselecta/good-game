@@ -111,10 +111,10 @@ export async function analyzeAllGames() {
 
         if (existing?.id) {
           // Update existing game
-          // @ts-expect-error - Supabase type mismatch
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { error: updateError } = await supabase
             .from('Game')
-            .update(gameData)
+            .update(gameData as any)
             .eq('id', existing.id);
 
           if (updateError) {
@@ -122,10 +122,10 @@ export async function analyzeAllGames() {
           }
         } else {
           // Create new game
-          // @ts-expect-error - Supabase type mismatch
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { error: insertError } = await supabase
             .from('Game')
-            .insert(gameData);
+            .insert(gameData as any);
 
           if (insertError) {
             throw new Error(`Failed to insert game: ${insertError.message}`);
