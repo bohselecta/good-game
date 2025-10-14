@@ -37,10 +37,15 @@ export default function GameCard({ game }: { game: Game }) {
   // Get tags based on quality score and excitement
   const getTags = () => {
     const tags = [];
+    
+    // Quality-based tags
     if (game.qualityScore && game.qualityScore >= 9) tags.push("THRILLER");
     else if (game.qualityScore && game.qualityScore >= 7) tags.push("COMPETITIVE");
-    else if (game.qualityScore && game.qualityScore <= 3) tags.push("BLOWOUT");
+    else if (game.qualityScore && game.qualityScore >= 5) tags.push("DECENT");
+    else if (game.qualityScore && game.qualityScore >= 3) tags.push("MEH");
+    else if (game.qualityScore && game.qualityScore <= 2) tags.push("BLOWOUT");
     
+    // Recommendation tags
     if (game.excitement === "thriller") tags.push("MUST WATCH");
     else if (game.excitement === "competitive") tags.push("WORTH IT");
     else if (game.excitement === "blowout") tags.push("SKIP");

@@ -138,9 +138,9 @@ CRITICAL: Do NOT reveal the winner or use team names when describing the outcome
       finalScore = Math.min(finalScore, 5);
     }
 
-    // Overtime always gets minimum 8 rating
+    // Overtime gets a boost but not guaranteed minimum
     if (metrics.isOvertime) {
-      finalScore = Math.max(8, finalScore);
+      finalScore = Math.min(10, finalScore + 1);
     }
 
     // Add recommendation field based on final score
