@@ -1,0 +1,48 @@
+:root {
+  /* Primitives */
+  --gg-ink: #e7ecf2;              /* primary text */
+  --gg-ink-dim: #b6c0cc;          /* secondary text */
+  --gg-bg: #0a0f14;               /* page bg (near-black/blue) */
+  --gg-panel: #121925;            /* card base */
+  --gg-panel-2: #0f1520;          /* deeper accent */
+  --gg-border: #1c2533;           /* hairline */
+  --gg-glow: 0 0 0.5px rgba(196,255,14,.5), 0 0 18px rgba(196,255,14,.12);
+
+  /* Brand */
+  --gg-navy: #1a2332;
+  --gg-lime: #c4ff0e;
+
+  /* League keys (muted, no neon) */
+  --key-nba: #4aa0ff;
+  --key-nfl: #ff7a4a;
+  --key-mlb: #46c0ff;
+  --key-nhl: #7ea7ff;
+  --key-soccer: #58d68d;
+  --key-ufc: #ff5b7a;
+
+  /* Surfaces */
+  --card-bg: color-mix(in srgb, var(--gg-panel) 86%, #ffffff 14%);
+  --card-hover: color-mix(in srgb, var(--gg-panel) 75%, #ffffff 25%);
+
+  /* Shadows/Depth (soft bloom) */
+  --elev-1: 0 8px 30px rgba(0,0,0,.35);
+  --elev-2: 0 16px 50px rgba(0,0,0,.45);
+
+  /* Radii */
+  --r-lg: 18px;
+  --r-xl: 24px;
+
+  /* Type scale */
+  --t-1: clamp(20px, 1.3vw, 24px);
+  --t-2: clamp(16px, .95vw, 18px);
+  --t-3: clamp(13px, .85vw, 14px);
+}
+
+html, body { 
+  background: var(--gg-bg); 
+  color: var(--gg-ink); 
+}
+
+* { 
+  accent-color: var(--gg-lime); 
+}

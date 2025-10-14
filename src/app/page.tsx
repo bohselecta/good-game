@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { GameCard } from '../components/GameCard';
+import Header from '../../components/Header';
+import GameCard from '../../components/GameCard';
 
 interface Game {
   id: string;
@@ -98,54 +99,38 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading games...</p>
-        </div>
+      <div className="loading">
+        <div className="spinner"></div>
+        <p className="subtle" style={{marginTop: '16px'}}>Loading games...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              GoodGame?
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover if recorded games are worth watching without spoiling the outcome.
-              Get AI-powered analysis of competitiveness, excitement, and entertainment value.
-            </p>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
+    <>
+      <Header onRefresh={triggerAnalysis} analyzing={analyzing} />
+      <main className="page">
         {games.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎮</div>
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">No games analyzed yet</h2>
-            <p className="text-gray-500 mb-6">
+          <div className="empty-state">
+            <div className="icon">🎮</div>
+            <h2>No games analyzed yet</h2>
+            <p>
               We&apos;re working on analyzing recent games. Check back soon!
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto mb-6">
-              <p className="text-sm text-blue-800 mb-4">
+            <div style={{background: 'var(--gg-panel)', border: '1px solid var(--gg-border)', borderRadius: 'var(--r-lg)', padding: '20px', maxWidth: '400px', margin: '0 auto'}}>
+              <p className="subtle" style={{marginBottom: '16px'}}>
                 <strong>Note:</strong> Games are analyzed automatically daily.
                 You can also manually trigger analysis below.
               </p>
               <button
                 onClick={triggerAnalysis}
                 disabled={analyzing}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                className="btn"
+                style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}
               >
                 {analyzing ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <div className="spinner" style={{width: '16px', height: '16px', borderWidth: '2px'}}></div>
                     Analyzing Games...
                   </>
                 ) : (
@@ -158,34 +143,9 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Recent Games ({games.length})
-                </h2>
-                <button
-                  onClick={triggerAnalysis}
-                  disabled={analyzing}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm"
-                >
-                  {analyzing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                      Updating...
-                    </>
-                  ) : (
-                    <>
-                      🔄 Refresh
-                    </>
-                  )}
-                </button>
-              </div>
-              <p className="text-gray-600">
-                Click on any game to reveal spoilers progressively
-              </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <h2 className="section-title">Recent Games ({games.length})</h2>
+            <p className="subtle">Click any card to progressively reveal spoilers</p>
+            <div className="grid">
               {games.map((game) => (
                 <GameCard key={game.id} game={game} />
               ))}
@@ -193,18 +153,6 @@ export default function HomePage() {
           </>
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t mt-16">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="text-center text-gray-500 text-sm">
-            <p>Built with Next.js, DeepSeek AI, and sports data APIs</p>
-            <p className="mt-2">
-              Supporting NFL, NBA, Premier League, and more sports
-            </p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }
