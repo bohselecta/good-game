@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/analyzer.ts
 import { supabase } from './supabase';
 import { analyzeGame } from './deepseek';
-import { fetchNFLGames, fetchNBAGames, fetchSoccerGames, getTodayDate, getYesterdayDate, getDaysAgoDate } from './sports-api';
+import { fetchNFLGames, fetchNBAGames, fetchSoccerGames, getDaysAgoDate } from './sports-api';
+import type { GameData } from './sports-api';
 
 // Generate date range from last analysis date or recent days
 function getDateRangeForAnalysis(lastAnalysisDate: Date | null): string[] {
@@ -10,7 +12,7 @@ function getDateRangeForAnalysis(lastAnalysisDate: Date | null): string[] {
   if (lastAnalysisDate) {
     // Get dates from last analysis until today
     const today = new Date();
-    let currentDate = new Date(lastAnalysisDate);
+    const currentDate = new Date(lastAnalysisDate);
 
     // Add one day to last analysis date to avoid re-analyzing
     currentDate.setDate(currentDate.getDate() + 1);
@@ -51,7 +53,7 @@ export async function analyzeGamesBySport(selectedSport: string, lastAnalysisDat
   console.log(`📅 Analyzing games from ${dateRange.length} days: ${dateRange[0]} to ${dateRange[dateRange.length - 1]}`);
 
   try {
-    const allGames: any[] = [];
+    const allGames: GameData[] = [];
 
     if (selectedSport === 'all') {
       // Analyze all available sports
@@ -103,7 +105,7 @@ export async function analyzeGamesBySport(selectedSport: string, lastAnalysisDat
         .eq('id', checkGameId)
         .limit(1);
 
-      const existing = existingGames?.[0];
+      const existing = existingGames?.[0] as { id: string; analysis: string | null } | undefined;
 
       if (existing?.analysis) {
         console.log(`⏭️  Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
@@ -136,7 +138,7 @@ export async function analyzeGamesBySport(selectedSport: string, lastAnalysisDat
           homeTeam: game.homeTeam,
           awayTeam: game.awayTeam,
           gameDate: new Date(game.gameDate),
-          status: 'final',
+          status: 'final' as const,
           qualityScore: analysis.qualityScore,
           isClose: analysis.isClose,
           excitement: analysis.excitement,
@@ -149,9 +151,9 @@ export async function analyzeGamesBySport(selectedSport: string, lastAnalysisDat
 
         if (existing?.id) {
           // Update existing game
-          const { error: updateError } = await supabase
+          const { error: updateError } = await (supabase as any)
             .from('Game')
-            .update({ ...gameData, updatedAt: new Date().toISOString() })
+            .update(gameData)
             .eq('id', existing.id);
 
           if (updateError) {
@@ -159,7 +161,7 @@ export async function analyzeGamesBySport(selectedSport: string, lastAnalysisDat
           }
         } else {
           // Create new game
-          const { error: insertError } = await supabase
+          const { error: insertError } = await (supabase as any)
             .from('Game')
             .insert(gameData);
 
@@ -184,7 +186,7 @@ export async function analyzeGamesBySport(selectedSport: string, lastAnalysisDat
 
   } catch (error) {
     console.error('❌ Error in analyzeGamesBySport:', error);
-    return { analyzedCount: 0, totalGames: 0, error: error.message };
+    return { analyzedCount: 0, totalGames: 0, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
