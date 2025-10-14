@@ -104,14 +104,15 @@ export async function analyzeAllGames() {
             analysis: analysis.analysis,
             leadChanges: analysis.leadChanges,
             finalScore: `${game.homeScore}-${game.awayScore}`,
-            winner: winner
+            winner: winner,
+            updatedAt: new Date().toISOString()
           };
 
         if (existing?.id) {
           // Update existing game
           const { error: updateError } = await supabase
             .from('Game')
-            .update(gameData)
+            .update({ ...gameData, updatedAt: new Date().toISOString() })
             .eq('id', existing.id);
 
           if (updateError) {
