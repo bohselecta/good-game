@@ -17,6 +17,7 @@ function calculateGameMetrics(gameData: {
   awayScore: number;
   quarter: string;
   stats: Record<string, unknown>;
+  status?: string;
 }) {
   const scoreMargin = Math.abs(gameData.homeScore - gameData.awayScore);
   const totalPoints = gameData.homeScore + gameData.awayScore;
