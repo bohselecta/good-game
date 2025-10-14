@@ -11,8 +11,14 @@ export async function GET(request: Request) {
     const games = await getRecentGames(limit);
     console.log('Found games:', games.length);
 
+    // Convert Date objects back to strings for frontend compatibility
+    const gamesWithStringDates = games.map(game => ({
+      ...game,
+      gameDate: game.gameDate instanceof Date ? game.gameDate.toISOString() : game.gameDate
+    }));
+
     return NextResponse.json({
-      games,
+      games: gamesWithStringDates,
       count: games.length
     });
   } catch (error) {
