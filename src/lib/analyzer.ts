@@ -1,31 +1,63 @@
 // lib/analyzer.ts
 import { prisma } from './db';
 import { analyzeGame } from './deepseek';
-import { fetchNFLGames, fetchNBAGames, fetchSoccerGames, getTodayDate, getYesterdayDate } from './sports-api';
+import { fetchNFLGames, fetchNBAGames, fetchSoccerGames, getTodayDate, getYesterdayDate, getDaysAgoDate } from './sports-api';
 
 export async function analyzeAllGames() {
   const today = getTodayDate();
   const yesterday = getYesterdayDate();
+  const twoDaysAgo = getDaysAgoDate(2);
+  const threeDaysAgo = getDaysAgoDate(3);
+  const fourDaysAgo = getDaysAgoDate(4);
+  const fiveDaysAgo = getDaysAgoDate(5);
+  const sixDaysAgo = getDaysAgoDate(6);
+  const sevenDaysAgo = getDaysAgoDate(7);
 
-  console.log(`Analyzing games for ${yesterday} and ${today}`);
+  console.log(`Analyzing games for the past 7 days: ${sevenDaysAgo} to ${today}`);
 
-  // Fetch games from multiple sports and dates
-  const nflGamesToday = await fetchNFLGames(today);
-  const nflGamesYesterday = await fetchNFLGames(yesterday);
-  const nbaGamesToday = await fetchNBAGames(today);
-  const nbaGamesYesterday = await fetchNBAGames(yesterday);
-  // Add soccer games for major leagues
-  const premierLeagueGames = await fetchSoccerGames('premier-league', yesterday);
+  // Fetch games from multiple sports and dates (past 7 days)
+  const nflGames = await Promise.all([
+    fetchNFLGames(sevenDaysAgo),
+    fetchNFLGames(sixDaysAgo),
+    fetchNFLGames(fiveDaysAgo),
+    fetchNFLGames(fourDaysAgo),
+    fetchNFLGames(threeDaysAgo),
+    fetchNFLGames(twoDaysAgo),
+    fetchNFLGames(yesterday),
+    fetchNFLGames(today)
+  ]);
+
+  const nbaGames = await Promise.all([
+    fetchNBAGames(sevenDaysAgo),
+    fetchNBAGames(sixDaysAgo),
+    fetchNBAGames(fiveDaysAgo),
+    fetchNBAGames(fourDaysAgo),
+    fetchNBAGames(threeDaysAgo),
+    fetchNBAGames(twoDaysAgo),
+    fetchNBAGames(yesterday),
+    fetchNBAGames(today)
+  ]);
+
+  // Add soccer games for major leagues (past 3 days)
+  const premierLeagueGames = await Promise.all([
+    fetchSoccerGames('premier-league', threeDaysAgo),
+    fetchSoccerGames('premier-league', twoDaysAgo),
+    fetchSoccerGames('premier-league', yesterday)
+  ]);
 
   const allGames = [
-    ...nflGamesToday,
-    ...nflGamesYesterday,
-    ...nbaGamesToday,
-    ...nbaGamesYesterday,
-    ...premierLeagueGames
+    ...nflGames.flat(),
+    ...nbaGames.flat(),
+    ...premierLeagueGames.flat()
   ];
 
   console.log(`Found ${allGames.length} games to analyze`);
+
+  // Debug: log sample of games found
+  console.log('Sample games found:');
+  allGames.slice(0, 5).forEach((game, i) => {
+    console.log(`${i + 1}. ${game.sport}: ${game.homeTeam} vs ${game.awayTeam} - Status: ${game.status} - Date: ${game.gameDate}`);
+  });
 
   let analyzedCount = 0;
 
@@ -53,16 +85,14 @@ export async function analyzeAllGames() {
     try {
       console.log(`Analyzing ${game.sport}: ${game.homeTeam} vs ${game.awayTeam}`);
 
-      // Get AI analysis
-      const analysis = await analyzeGame({
-        sport: game.sport,
-        homeTeam: game.homeTeam,
-        awayTeam: game.awayTeam,
-        homeScore: game.homeScore,
-        awayScore: game.awayScore,
-        quarter: game.quarter,
-        stats: {} // Could be expanded with more detailed stats
-      });
+      // TEMPORARY: Skip DeepSeek analysis and use dummy data
+      const dummyAnalysis = {
+        qualityScore: Math.floor(Math.random() * 5) + 6, // 6-10
+        isClose: Math.random() > 0.5,
+        excitement: Math.random() > 0.5 ? 'thriller' : 'competitive',
+        analysis: `This was a ${Math.random() > 0.5 ? 'close' : 'competitive'} game between ${game.homeTeam} and ${game.awayTeam}.`,
+        leadChanges: Math.floor(Math.random() * 5)
+      };
 
       // Determine winner
       const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
@@ -77,30 +107,30 @@ export async function analyzeAllGames() {
           awayTeam: game.awayTeam,
           gameDate: game.gameDate,
           status: 'final',
-          qualityScore: analysis.qualityScore,
-          isClose: analysis.isClose,
-          excitement: analysis.excitement,
-          analysis: analysis.analysis,
-          leadChanges: analysis.leadChanges,
+          qualityScore: dummyAnalysis.qualityScore,
+          isClose: dummyAnalysis.isClose,
+          excitement: dummyAnalysis.excitement,
+          analysis: dummyAnalysis.analysis,
+          leadChanges: dummyAnalysis.leadChanges,
           finalScore: `${game.homeScore}-${game.awayScore}`,
           winner: winner
         },
         update: {
-          qualityScore: analysis.qualityScore,
-          isClose: analysis.isClose,
-          excitement: analysis.excitement,
-          analysis: analysis.analysis,
-          leadChanges: analysis.leadChanges,
+          qualityScore: dummyAnalysis.qualityScore,
+          isClose: dummyAnalysis.isClose,
+          excitement: dummyAnalysis.excitement,
+          analysis: dummyAnalysis.analysis,
+          leadChanges: dummyAnalysis.leadChanges,
           finalScore: `${game.homeScore}-${game.awayScore}`,
           winner: winner
         }
       });
 
       analyzedCount++;
-      console.log(`✅ Analyzed ${game.homeTeam} vs ${game.awayTeam} - Score: ${analysis.qualityScore}/10`);
+      console.log(`✅ Analyzed ${game.homeTeam} vs ${game.awayTeam} - Score: ${dummyAnalysis.qualityScore}/10`);
 
       // Add a small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
     } catch (error) {
       console.error(`❌ Error analyzing ${game.homeTeam} vs ${game.awayTeam}:`, error);

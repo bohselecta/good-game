@@ -153,3 +153,10 @@ export function getYesterdayDate(): string {
   yesterday.setDate(yesterday.getDate() - 1);
   return yesterday.toISOString().split('T')[0].replace(/-/g, '');
 }
+
+// Utility function to get date N days ago in YYYYMMDD format
+export function getDaysAgoDate(daysAgo: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString().split('T')[0].replace(/-/g, '');
+}
