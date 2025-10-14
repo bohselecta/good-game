@@ -1,5 +1,5 @@
 // lib/analyzer.ts
-import { prisma } from './db';
+import { supabase } from './supabase';
 import { analyzeGame } from './deepseek';
 import { fetchNFLGames, fetchNBAGames, fetchSoccerGames, getTodayDate, getYesterdayDate, getDaysAgoDate } from './sports-api';
 
@@ -69,13 +69,15 @@ export async function analyzeAllGames() {
     }
 
     // Check if already analyzed
-    const existing = await prisma.game.findFirst({
-      where: {
-        homeTeam: game.homeTeam,
-        awayTeam: game.awayTeam,
-        gameDate: game.gameDate
-      }
-    });
+    const { data: existingGames } = await supabase
+      .from('Game')
+      .select('id, analysis')
+      .eq('homeTeam', game.homeTeam)
+      .eq('awayTeam', game.awayTeam)
+      .eq('gameDate', game.gameDate)
+      .limit(1);
+
+    const existing = existingGames?.[0];
 
     if (existing?.analysis) {
       console.log(`Skipping ${game.homeTeam} vs ${game.awayTeam} - already analyzed`);
@@ -97,13 +99,11 @@ export async function analyzeAllGames() {
         status: game.status
       });
 
-      // Determine winner
-      const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
+        // Determine winner
+        const winner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
 
-      // Save to database
-      await prisma.game.upsert({
-        where: { id: existing?.id || 'new' },
-        create: {
+        // Save to database using Supabase
+        const gameData = {
           sport: game.sport,
           league: game.league,
           homeTeam: game.homeTeam,
@@ -117,17 +117,28 @@ export async function analyzeAllGames() {
           leadChanges: analysis.leadChanges,
           finalScore: `${game.homeScore}-${game.awayScore}`,
           winner: winner
-        },
-        update: {
-          qualityScore: analysis.qualityScore,
-          isClose: analysis.isClose,
-          excitement: analysis.excitement,
-          analysis: analysis.analysis,
-          leadChanges: analysis.leadChanges,
-          finalScore: `${game.homeScore}-${game.awayScore}`,
-          winner: winner
+        };
+
+        if (existing?.id) {
+          // Update existing game
+          const { error: updateError } = await supabase
+            .from('Game')
+            .update(gameData)
+            .eq('id', existing.id);
+
+          if (updateError) {
+            throw new Error(`Failed to update game: ${updateError.message}`);
+          }
+        } else {
+          // Create new game
+          const { error: insertError } = await supabase
+            .from('Game')
+            .insert(gameData);
+
+          if (insertError) {
+            throw new Error(`Failed to insert game: ${insertError.message}`);
+          }
         }
-      });
 
       analyzedCount++;
       console.log(`✅ Analyzed ${game.homeTeam} vs ${game.awayTeam} - Score: ${analysis.qualityScore}/10 (${analysis.recommendation})`);
@@ -148,15 +159,20 @@ export async function analyzeAllGames() {
 export async function getRecentGames(limit: number = 50) {
   try {
     console.log('Getting recent games from database...');
-    const games = await prisma.game.findMany({
-      orderBy: { gameDate: 'desc' },
-      take: limit,
-      where: {
-        analysis: { not: null } // Only show analyzed games
-      }
-    });
-    console.log(`Found ${games.length} analyzed games in database`);
-    return games;
+    const { data: games, error } = await supabase
+      .from('Game')
+      .select('*')
+      .not('analysis', 'is', null)
+      .order('gameDate', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Supabase error in getRecentGames:', error);
+      throw new Error(`Database query failed: ${error.message}`);
+    }
+
+    console.log(`Found ${games?.length || 0} analyzed games in database`);
+    return games || [];
   } catch (error) {
     console.error('Database error in getRecentGames:', error);
     throw new Error(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -165,7 +181,16 @@ export async function getRecentGames(limit: number = 50) {
 
 // Function to get a specific game by ID
 export async function getGameById(id: string) {
-  return await prisma.game.findUnique({
-    where: { id }
-  });
+  const { data: game, error } = await supabase
+    .from('Game')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching game by ID:', error);
+    return null;
+  }
+
+  return game;
 }
