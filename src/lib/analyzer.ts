@@ -111,7 +111,7 @@ export async function analyzeAllGames() {
 
         if (existing?.id) {
           // Update existing game
-          // @ts-ignore
+          // @ts-expect-error - Supabase type mismatch
           const { error: updateError } = await supabase
             .from('Game')
             .update(gameData)
@@ -122,7 +122,7 @@ export async function analyzeAllGames() {
           }
         } else {
           // Create new game
-          // @ts-ignore
+          // @ts-expect-error - Supabase type mismatch
           const { error: insertError } = await supabase
             .from('Game')
             .insert(gameData);
