@@ -288,6 +288,24 @@ a:focus-visible, .btn:focus-visible, .card:focus-visible {
   opacity: 0.6;
 }
 
+.empty-state .logo-container {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-state .logo-container img {
+  box-shadow: var(--elev-1);
+  border: 2px solid var(--gg-border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.empty-state .logo-container img:hover {
+  transform: scale(1.05);
+  box-shadow: var(--elev-2), var(--gg-glow);
+}
+
 .empty-state h2 {
   font-size: var(--t-1);
   font-weight: 700;

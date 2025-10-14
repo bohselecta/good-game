@@ -124,7 +124,15 @@ export default function HomePage() {
       <main className="page">
         {games.length === 0 ? (
           <div className="empty-state">
-            <div className="icon">🎮</div>
+            <div className="logo-container">
+              <img 
+                src="/logo.png" 
+                alt="GoodGame?" 
+                width="120" 
+                height="120"
+                style={{ borderRadius: '20px' }}
+              />
+            </div>
             <h2>No games analyzed yet</h2>
             <p>
               We&apos;re working on analyzing recent games. Check back soon!
