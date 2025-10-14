@@ -113,8 +113,7 @@ export async function analyzeAllGames() {
           // Update existing game
           const { error: updateError } = await supabase
             .from('Game')
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .update(gameData as any)
+            .update(gameData as Record<string, unknown>)
             .eq('id', existing.id);
 
           if (updateError) {
@@ -124,8 +123,7 @@ export async function analyzeAllGames() {
           // Create new game
           const { error: insertError } = await supabase
             .from('Game')
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .insert(gameData as any);
+            .insert(gameData as Record<string, unknown>);
 
           if (insertError) {
             throw new Error(`Failed to insert game: ${insertError.message}`);
