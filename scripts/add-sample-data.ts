@@ -24,7 +24,9 @@ const sampleGames = [
     analysis: 'This was an incredible back-and-forth battle between two championship-caliber teams. Multiple lead changes in the fourth quarter kept fans on the edge of their seats until the final buzzer.',
     leadChanges: 12,
     finalScore: '118-115',
-    winner: 'Los Angeles Lakers'
+    winner: 'Los Angeles Lakers',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: 'sample-2',
@@ -40,7 +42,9 @@ const sampleGames = [
     analysis: 'A hard-fought playoff matchup with strong defensive play from both sides. The game remained competitive throughout, with neither team able to pull away until late in the fourth quarter.',
     leadChanges: 3,
     finalScore: '27-24',
-    winner: 'Kansas City Chiefs'
+    winner: 'Kansas City Chiefs',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: 'sample-3',
@@ -56,7 +60,9 @@ const sampleGames = [
     analysis: 'A one-sided affair from the opening tip. The Celtics dominated on both ends of the court, leading by double digits for most of the game.',
     leadChanges: 0,
     finalScore: '125-98',
-    winner: 'Boston Celtics'
+    winner: 'Boston Celtics',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: 'sample-4',
@@ -72,7 +78,9 @@ const sampleGames = [
     analysis: 'An absolute classic that had everything - goals, drama, controversy, and a stunning comeback. This match will be remembered as one of the greatest Premier League games ever played.',
     leadChanges: 4,
     finalScore: '3-3',
-    winner: 'Draw'
+    winner: 'Draw',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: 'sample-5',
@@ -88,7 +96,9 @@ const sampleGames = [
     analysis: 'A solid baseball game with good pitching duels and some timely hitting. While not a blowout, it lacked the dramatic moments that make for truly memorable games.',
     leadChanges: 2,
     finalScore: '4-2',
-    winner: 'New York Yankees'
+    winner: 'New York Yankees',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 
