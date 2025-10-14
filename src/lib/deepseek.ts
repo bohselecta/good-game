@@ -1,11 +1,25 @@
 // lib/deepseek.ts
 import OpenAI from 'openai';
 
-// Initialize OpenAI client with DeepSeek configuration
-const openai = new OpenAI({
-  baseURL: 'https://api.deepseek.com',
-  apiKey: process.env.DEEPSEEK_API_KEY,
-});
+// Lazy initialization of OpenAI client
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient() {
+  if (!openaiClient) {
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('DEEPSEEK_API_KEY environment variable is not set');
+    }
+    
+    openaiClient = new OpenAI({
+      baseURL: 'https://api.deepseek.com',
+      apiKey: apiKey,
+    });
+  }
+  
+  return openaiClient;
+}
 
 export interface GameAnalysis {
   qualityScore: number; // 1-10
@@ -70,12 +84,6 @@ export async function analyzeGame(gameData: {
   stats: Record<string, unknown>;
   status?: string;
 }): Promise<GameAnalysis> {
-  // Check if API key is available
-  if (!process.env.DEEPSEEK_API_KEY) {
-    console.error('DEEPSEEK_API_KEY environment variable is not set');
-    throw new Error('DeepSeek API key is not configured');
-  }
-
   const metrics = calculateGameMetrics(gameData);
 
   const prompt = `You are an expert sports analyst specializing in game watchability. Analyze this ${gameData.sport} game and provide detailed insights for someone deciding whether to watch a recorded game.
@@ -134,6 +142,7 @@ CRITICAL RULES:
   try {
     console.log('Calling DeepSeek API with OpenAI SDK...');
     
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: 'deepseek-chat',
       messages: [{ role: 'user', content: prompt }],
