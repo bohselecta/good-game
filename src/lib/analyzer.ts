@@ -13,37 +13,26 @@ export async function analyzeAllGames() {
   const sixDaysAgo = getDaysAgoDate(6);
   const sevenDaysAgo = getDaysAgoDate(7);
 
-  console.log(`Analyzing games for the past 7 days: ${sevenDaysAgo} to ${today}`);
+  console.log(`Analyzing games for the past 3 days: ${twoDaysAgo} to ${today}`);
 
-  // Fetch games from multiple sports and dates (past 7 days)
-  const nflGames = await Promise.all([
-    fetchNFLGames(sevenDaysAgo),
-    fetchNFLGames(sixDaysAgo),
-    fetchNFLGames(fiveDaysAgo),
-    fetchNFLGames(fourDaysAgo),
-    fetchNFLGames(threeDaysAgo),
-    fetchNFLGames(twoDaysAgo),
-    fetchNFLGames(yesterday),
-    fetchNFLGames(today)
-  ]);
+    // Fetch games from multiple sports and dates (past 3 days to prevent timeout)
+    const nflGames = await Promise.all([
+      fetchNFLGames(twoDaysAgo),
+      fetchNFLGames(yesterday),
+      fetchNFLGames(today)
+    ]);
 
-  const nbaGames = await Promise.all([
-    fetchNBAGames(sevenDaysAgo),
-    fetchNBAGames(sixDaysAgo),
-    fetchNBAGames(fiveDaysAgo),
-    fetchNBAGames(fourDaysAgo),
-    fetchNBAGames(threeDaysAgo),
-    fetchNBAGames(twoDaysAgo),
-    fetchNBAGames(yesterday),
-    fetchNBAGames(today)
-  ]);
+    const nbaGames = await Promise.all([
+      fetchNBAGames(twoDaysAgo),
+      fetchNBAGames(yesterday),
+      fetchNBAGames(today)
+    ]);
 
-  // Add soccer games for major leagues (past 3 days)
-  const premierLeagueGames = await Promise.all([
-    fetchSoccerGames('premier-league', threeDaysAgo),
-    fetchSoccerGames('premier-league', twoDaysAgo),
-    fetchSoccerGames('premier-league', yesterday)
-  ]);
+    // Add soccer games for major leagues (past 2 days)
+    const premierLeagueGames = await Promise.all([
+      fetchSoccerGames('premier-league', yesterday),
+      fetchSoccerGames('premier-league', today)
+    ]);
 
   const allGames = [
     ...nflGames.flat(),

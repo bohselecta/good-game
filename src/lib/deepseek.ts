@@ -135,7 +135,7 @@ CRITICAL RULES:
     console.log('Calling DeepSeek API with OpenAI SDK...');
     
     const completion = await openai.chat.completions.create({
-      model: 'deepseek-reasoner',
+      model: 'deepseek-chat',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.0,
       response_format: { type: 'json_object' }
