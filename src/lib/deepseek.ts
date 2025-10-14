@@ -64,44 +64,58 @@ export async function analyzeGame(gameData: {
 }): Promise<GameAnalysis> {
   const metrics = calculateGameMetrics(gameData);
 
-  const prompt = `You are a sports analyst rating game watchability. Analyze this ${gameData.sport} game objectively.
+  const prompt = `You are an expert sports analyst specializing in game watchability. Analyze this ${gameData.sport} game and provide detailed insights for someone deciding whether to watch a recorded game.
 
 GAME DATA:
 - ${gameData.homeTeam}: ${gameData.homeScore}
 - ${gameData.awayTeam}: ${gameData.awayScore}
 - Final Margin: ${metrics.scoreMargin} points
 - Status: ${gameData.status || gameData.quarter}
+- Total Points: ${metrics.totalPoints}
 
-SCORING CRITERIA:
-Rate 1-10 based on:
-- Score closeness (most important): Is the margin within 1-2 possessions?
-- Competitiveness: Was it close throughout or just at the end?
-- Lead changes: Multiple momentum swings indicate excitement
-- Context: High-scoring thriller vs defensive battle
+ANALYSIS REQUIREMENTS:
+Provide detailed analysis covering:
+1. Game flow and competitiveness throughout
+2. Key moments and momentum swings
+3. Scoring patterns and offensive/defensive performance
+4. Overall entertainment value and watchability
+5. Specific reasons why someone should or shouldn't watch
+
+SCORING CRITERIA (Rate 1-10):
+- Score closeness (most important): Margin within 1-2 possessions?
+- Competitiveness: Close throughout or just at the end?
+- Momentum swings: Multiple lead changes and exciting moments?
+- Context: High-scoring thriller vs defensive battle?
+- Entertainment: Memorable plays, comebacks, or dramatic finishes?
 
 RATING SCALE:
 10: Instant classic, must-watch (buzzer beaters, OT thrillers, huge comebacks)
-9: Elite entertainment, highly recommended
-8: Very good game, worth watching
-7: Good game, competitive throughout
-6: Decent game, some exciting moments
-5: Average game, watchable but not special
-4: Below average, one-sided stretches
-3: Poor game, mostly a blowout
-2: Very one-sided
-1: Complete blowout, skip it
+9: Elite entertainment, highly recommended (multiple lead changes, dramatic finish)
+8: Very good game, worth watching (competitive throughout, exciting moments)
+7: Good game, competitive throughout (solid watch with some highlights)
+6: Decent game, some exciting moments (watchable but not special)
+5: Average game, watchable but not special (mediocre entertainment)
+4: Below average, one-sided stretches (mostly boring)
+3: Poor game, mostly a blowout (skip unless you're a fan)
+2: Very one-sided (not worth your time)
+1: Complete blowout, skip it (waste of time)
 
 RESPOND IN JSON (no markdown, just pure JSON):
 {
   "qualityScore": <1-10 integer>,
   "isClose": <boolean - was margin within 1-2 possessions?>,
   "excitement": "<thriller|competitive|blowout>",
-  "reasoning": "<2-3 sentence analysis WITHOUT revealing winner or final score>",
+  "reasoning": "<3-4 sentence detailed analysis WITHOUT revealing winner or final score. Include specific game flow, momentum swings, and entertainment factors>",
   "leadChanges": <estimated number, or null if unknown>,
   "recommendation": "<Must Watch|Worth Watching|Maybe Skip|Skip>"
 }
 
-CRITICAL: Do NOT reveal the winner or use team names when describing the outcome. Say "the winning team" not the actual team name.`;
+CRITICAL RULES:
+- Do NOT reveal the winner or use team names when describing the outcome
+- Say "the winning team" or "the home team" not actual team names
+- Focus on game flow, competitiveness, and entertainment value
+- Provide specific reasons for the rating (momentum swings, scoring patterns, etc.)
+- Make it helpful for someone deciding whether to watch a recorded game`;
 
   try {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -192,7 +206,7 @@ CRITICAL: Do NOT reveal the winner or use team names when describing the outcome
       qualityScore,
       isClose: metrics.isClose,
       excitement,
-      analysis: `Final margin of ${metrics.scoreMargin} points. ${excitement === 'blowout' ? 'One-sided contest.' : 'Competitive matchup with good back-and-forth action.'}`,
+      analysis: `This ${gameData.sport} game featured a ${metrics.scoreMargin}-point margin with ${metrics.totalPoints} total points scored. ${excitement === 'blowout' ? 'The game was largely one-sided with limited competitive moments, making it less engaging for casual viewers.' : excitement === 'thriller' ? 'The game was highly competitive throughout with multiple momentum swings and exciting plays that kept viewers engaged until the final moments.' : 'The game remained competitive for most of the duration with some exciting moments, though not consistently thrilling.'} ${metrics.isOvertime ? 'The overtime period added extra drama and excitement to an already competitive matchup.' : ''} Overall, this was a ${excitement} game that ${qualityScore >= 7 ? 'offers good entertainment value' : qualityScore >= 5 ? 'provides decent viewing' : 'may not be worth the time investment'} for most viewers.`,
       leadChanges: null,
       recommendation
     };
