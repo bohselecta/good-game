@@ -10,7 +10,7 @@ interface Game {
   league: string;
   homeTeam: string;
   awayTeam: string;
-  gameDate: Date;
+  gameDate: string;
   status: string;
   qualityScore?: number;
   isClose?: boolean;
@@ -55,11 +55,7 @@ export default function HomePage() {
         }
 
         const data = await res.json();
-        const formattedGames = (data.games || []).map((game: ApiGameResponse) => ({
-          ...game,
-          gameDate: new Date(game.gameDate)
-        }));
-        setGames(formattedGames);
+        setGames(data.games || []);
       } catch (error) {
         console.error('Error fetching games:', error);
       } finally {
